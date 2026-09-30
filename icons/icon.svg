@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <rect width="512" height="512" rx="112" fill="#2f6f5e"/>
+  <rect x="120" y="96" width="272" height="320" rx="28" fill="#ffffff"/>
+  <rect x="120" y="96" width="60" height="320" rx="28" fill="#e3efeb"/>
+  <g fill="#2f6f5e">
+    <circle cx="150" cy="168" r="12"/>
+    <circle cx="150" cy="256" r="12"/>
+    <circle cx="150" cy="344" r="12"/>
+  </g>
+  <g stroke="#c8d6d1" stroke-width="10" stroke-linecap="round">
+    <line x1="212" y1="168" x2="352" y2="168"/>
+    <line x1="212" y1="256" x2="352" y2="256"/>
+    <line x1="212" y1="344" x2="300" y2="344"/>
+  </g>
+  <text x="332" y="372" font-family="-apple-system, Segoe UI, Roboto, sans-serif" font-size="120" font-weight="800" fill="#2f6f5e" text-anchor="middle">1</text>
+</svg>

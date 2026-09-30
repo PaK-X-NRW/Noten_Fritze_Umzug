@@ -1,0 +1,20 @@
+{
+  "name": "Noten-Fritze",
+  "short_name": "Noten-Fritze",
+  "description": "Lokale Noten- und Mitarbeitsverwaltung für Lehrkräfte. Alle Daten bleiben auf dem Gerät.",
+  "lang": "de",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "landscape",
+  "background_color": "#f4f6f5",
+  "theme_color": "#2f6f5e",
+  "icons": [
+    {
+      "src": "icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

@@ -1,0 +1,59 @@
+/* Farben wie in der App (css/styles.css im Haupt-Repo) */
+:root {
+  --bg: #f4f6f5;
+  --surface: #ffffff;
+  --line: #dce2e0;
+  --text: #1f2a27;
+  --text-muted: #6b7a75;
+  --accent: #2f6f5e;
+  --accent-dark: #245546;
+  --danger: #c0392b;
+  --ok: #2e7d32;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 16px;
+  background: var(--bg);
+  color: var(--text);
+  font: 17px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+.karte {
+  width: 100%;
+  max-width: 560px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 28px 24px;
+  box-shadow: 0 2px 10px rgba(31, 42, 39, 0.08);
+}
+.logo { display: block; margin-bottom: 12px; }
+h1 { margin: 0 0 8px; font-size: 1.5rem; }
+a { color: var(--accent); }
+.btn {
+  display: inline-block;
+  min-height: 48px;
+  padding: 12px 20px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  text-decoration: none;
+  cursor: pointer;
+}
+.btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600; }
+.btn.primary:active { background: var(--accent-dark); }
+.btn:disabled { opacity: 0.6; cursor: default; }
+.status { min-height: 1.5em; }
+.status.ok { color: var(--ok); font-weight: 600; }
+.status.fehler { color: var(--danger); }
+details { margin: 16px 0; }
+summary { cursor: pointer; color: var(--text-muted); }
+ol { padding-left: 1.3em; }
+li { margin: 8px 0; }
+.hinweis { color: var(--text-muted); font-size: 0.93rem; }
