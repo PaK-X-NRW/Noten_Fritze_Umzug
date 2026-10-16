@@ -204,7 +204,9 @@
     } else if (m.typ === "noten-fritze-umzug-fertig") {
       $("uebertragen").disabled = false;
       if (m.ok) {
-        try { localStorage.setItem(MERKER, new Date().toISOString()); } catch (_) { /* egal */ }
+        const jetzt = new Date().toISOString();
+        try { localStorage.setItem(MERKER, jetzt); } catch (_) { /* egal */ }
+        schonUebertragen(jetzt);
         status("Fertig: Die Daten sind auf noten-fritze.de, eine Backup-Datei liegt zusätzlich " +
           "in deinen Downloads. Bitte ab jetzt nur noch auf noten-fritze.de arbeiten.", "ok");
       } else {
@@ -212,6 +214,17 @@
       }
     }
   });
+
+  // Schon einmal übertragen: nur bremsen, nicht sperren. Die eigentliche
+  // Sicherung sitzt in der App (Warnung + Backup vor dem Überschreiben).
+  function schonUebertragen(am) {
+    const hinweis = $("schon-hinweis");
+    hinweis.textContent = "Du hast am " + new Date(am).toLocaleDateString("de-DE") + " schon übertragen. " +
+      "Ein erneutes Übertragen überschreibt deine Änderungen auf noten-fritze.de.";
+    hinweis.hidden = false;
+    $("uebertragen").textContent = "Erneut übertragen";
+    $("uebertragen").classList.remove("primary");
+  }
 
   async function start() {
     const installiert = istInstalliert();
@@ -242,9 +255,7 @@
     }
     let schonAm = null;
     try { schonAm = localStorage.getItem(MERKER); } catch (_) { /* egal */ }
-    if (schonAm) {
-      status("Bereits übertragen am " + new Date(schonAm).toLocaleDateString("de-DE") + ".", "ok");
-    }
+    if (schonAm) schonUebertragen(schonAm);
     $("uebertragen").addEventListener("click", uebertragen);
     Array.prototype.forEach.call(document.querySelectorAll(".sichern"), (btn) => btn.addEventListener("click", sichern));
     document.addEventListener("visibilitychange", () => {

@@ -34,6 +34,8 @@ Die Gegenstelle muss im Haupt-Repo eingebaut sein, **bevor** umgestellt wird.
    Export-Ordner-Handle), Datei-Inhalte als `daten64`. Neue Datenarten der App kommen so
    ohne Änderung an dieser Seite mit, sobald der Import der App sie kennt.
 4. Die App prüft `event.origin`, fragt bei vorhandenen Daten nach (ersetzen / abbrechen),
+   warnt bei einer erneuten Übertragung („Schon einmal übernommen“), sichert eigene Daten
+   der neuen Seite vorher automatisch als Backup,
    ruft `Store.importAll(backup, { replace: true })` auf und meldet
    `{ typ: "noten-fritze-umzug-fertig", ok: true }` bzw. `{ ok: false, fehler: "…" }`.
 
