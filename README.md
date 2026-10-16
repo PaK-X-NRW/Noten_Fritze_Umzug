@@ -12,7 +12,7 @@ dabei nichts.
 
 | Datei | Zweck |
 |---|---|
-| `index.html`, `umzug.js`, `umzug.css` | Umzugsseite: liest die Datenbank `noten-fritze`, Button „Daten übertragen“, Backup-Download als Rückfall |
+| `index.html`, `umzug.js`, `umzug.css` | Umzugsseite: liest die Datenbank `noten-fritze`. Im Browser: Button „Daten übertragen“ (lädt zusätzlich automatisch ein Backup herunter), Backup als Rückfall. Als installierte App (`display-mode: standalone`): Anleitung über „Backup sichern“ (iOS: Teilen-Blatt) → neue App installieren → importieren → erst dann alte App löschen. Grund: Apps auf dem Home-Bildschirm haben unter iOS einen eigenen, vom Browser getrennten Speicher |
 | `service-worker.js` | Löst den Offline-Cache der alten App ab (Cache löschen, Fenster neu laden, abmelden) |
 | `404.html` | Jede unbekannte Adresse führt zur Umzugsseite |
 | `info.html` | Leitet zur Infoseite unter der neuen Adresse weiter |

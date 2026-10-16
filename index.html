@@ -21,29 +21,55 @@
     <p>Die neue Adresse lautet <a href="https://noten-fritze.de/"><strong>noten-fritze.de</strong></a>.</p>
 
     <section id="mit-daten" hidden>
-      <p>Auf diesem Gerät liegen noch Daten aus der alten Adresse:
-        <strong id="umfang"></strong>. Deine Daten sind im Browser an die Adresse gebunden.
-        Übertrage sie deshalb einmal an die neue Adresse.</p>
-      <button class="btn primary" id="uebertragen" type="button">Daten nach noten-fritze.de übertragen</button>
+      <p>Hier liegen noch deine Daten aus der alten Adresse: <strong id="umfang"></strong>.
+        Sie sind an die Adresse gebunden und müssen einmal mitgenommen werden.</p>
+
+      <!-- Installierte App (Home-Bildschirm): eigener Speicher, Weg über die Backup-Datei -->
+      <div id="weg-installiert" hidden>
+        <p>Du nutzt Noten-Fritze als <strong>installierte App</strong>. Die neue Adresse braucht
+          eine neue App. So nimmst du deine Daten mit:</p>
+        <ol class="schritte">
+          <li><button class="btn primary sichern" type="button">Backup sichern</button><br />
+            Die Datei z. B. in der Dateien-App („In Dateien sichern“) ablegen.</li>
+          <li><a href="https://noten-fritze.de/">noten-fritze.de</a> im Browser öffnen und dort neu
+            installieren (iPad/iPhone: Safari → Teilen → „Zum Home-Bildschirm“).</li>
+          <li>Die <strong>neue</strong> App öffnen → ⚙️ Einstellungen → „Backup importieren“ →
+            die Datei wählen und „Alle bestehenden Daten vorher löschen“ anhaken.</li>
+          <li>Prüfen, ob alles da ist. <strong>Erst dann</strong> diese alte App löschen.</li>
+        </ol>
+        <p class="warnung">Diese alte App erst löschen, wenn deine Daten in der neuen App
+          angekommen sind – mit der App werden auch die Daten darin gelöscht.</p>
+      </div>
+
+      <!-- Im Browser: Übertragung per Knopfdruck -->
+      <div id="weg-uebertragen" hidden>
+        <p id="computer-hinweis" hidden>Am Computer geht es auch direkt:</p>
+        <button class="btn primary" id="uebertragen" type="button">Daten nach noten-fritze.de übertragen</button>
+        <p class="hinweis">Dabei wird zur Sicherheit automatisch eine Backup-Datei heruntergeladen.</p>
+      </div>
+
       <p class="status" id="status" role="status" aria-live="polite"></p>
-      <details>
+
+      <details id="weg-backup" hidden>
         <summary>Klappt nicht? Übertragung per Backup-Datei</summary>
         <ol>
-          <li><button class="btn" id="herunterladen" type="button">Backup herunterladen</button></li>
+          <li><button class="btn sichern" type="button">Backup sichern</button></li>
           <li><a href="https://noten-fritze.de/">noten-fritze.de</a> öffnen.</li>
-          <li>Einstellungen → „Backup importieren“ → die heruntergeladene Datei wählen.</li>
+          <li>⚙️ Einstellungen → „Backup importieren“ → die Datei wählen und
+            „Alle bestehenden Daten vorher löschen“ anhaken.</li>
         </ol>
       </details>
-      <p class="hinweis">Die Daten hier werden dabei nicht gelöscht. Arbeite nach der Übertragung
-        aber nur noch auf noten-fritze.de weiter.</p>
+      <p class="hinweis">Die Daten hier werden dabei nicht gelöscht. Arbeite danach aber nur noch
+        auf noten-fritze.de weiter.</p>
     </section>
 
     <section id="ohne-daten" hidden>
       <a class="btn primary" href="https://noten-fritze.de/">Zu noten-fritze.de</a>
     </section>
 
-    <p class="hinweis">Wer Noten-Fritze als App installiert hat: bitte auf noten-fritze.de
-      neu installieren und die alte App danach entfernen.</p>
+    <p class="hinweis" id="app-hinweis">Du hast Noten-Fritze auch als App auf dem Home-Bildschirm?
+      Dann liegen deine Daten in der App. Öffne die alte App – sie zeigt dir, wie du umziehst.
+      Lösche sie erst, wenn die Daten in der neuen App angekommen sind.</p>
   </main>
   <script src="umzug.js"></script>
 </body>

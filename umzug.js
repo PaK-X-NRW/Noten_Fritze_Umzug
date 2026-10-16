@@ -109,6 +109,61 @@
 
   function plural(n, eins, mehr) { return n + " " + (n === 1 ? eins : mehr); }
 
+  // Als App auf dem Home-Bildschirm gestartet? Dann hat sie (iOS) einen eigenen
+  // Speicher, getrennt vom Browser – der Weg führt über die Backup-Datei.
+  function istInstalliert() {
+    return window.navigator.standalone === true ||
+      !!(window.matchMedia && window.matchMedia("(display-mode: standalone)").matches);
+  }
+  // iPad meldet sich als Mac, hat aber Touch
+  function istIOS() {
+    return /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+      (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+  }
+
+  // Zuletzt gelesenes Backup: Das Teilen-Blatt muss direkt im Tipp öffnen
+  // (iOS), ein Lesen davor wäre zu spät. Beim Zurückkehren wird neu gelesen.
+  let letztes = null;
+  function backupDatei(b) {
+    const name = "noten-fritze-backup-" + new Date().toISOString().slice(0, 10) + ".json";
+    return { name, inhalt: JSON.stringify(b, null, 2) };
+  }
+  function herunterladen(b) {
+    const d = backupDatei(b);
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(new Blob([d.inhalt], { type: "application/json" }));
+    a.download = d.name;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 10000);
+  }
+
+  // Backup sichern: auf iPad/iPhone über das Teilen-Blatt („In Dateien
+  // sichern“), sonst als Download – wie CSV.speichern in der App.
+  function sichern() {
+    if (!letztes) { status("Die Daten konnten nicht gelesen werden.", "fehler"); return; }
+    const d = backupDatei(letztes);
+    if (istIOS() && typeof File === "function") {
+      let datei = null;
+      try { datei = new File([d.inhalt], d.name, { type: "application/json" }); } catch (_) { datei = null; }
+      if (datei && navigator.canShare && navigator.canShare({ files: [datei] })) {
+        navigator.share({ files: [datei] })
+          .then(() => status("Backup gesichert. Weiter mit Schritt 2.", "ok"))
+          .catch((err) => {
+            if (err && err.name === "AbortError") return;
+            alsDownload();
+          });
+        return;
+      }
+    }
+    alsDownload();
+  }
+  function alsDownload() {
+    herunterladen(letztes);
+    status("Backup wurde heruntergeladen" + (istInstalliert() ? ". Weiter mit Schritt 2." : "."), "ok");
+  }
+
   function uebertragen() {
     // Das Fenster muss synchron im Klick geöffnet werden – nach einem await
     // blockieren Safari & Co. es als Pop-up. Gelesen wird parallel.
@@ -119,6 +174,8 @@
       return;
     }
     backup = aktuellesBackup();
+    // Zur Sicherheit immer auch eine Backup-Datei herunterladen
+    backup.then((b) => { if (b) { letztes = b; herunterladen(b); } }).catch(() => { /* Meldung unten */ });
     $("uebertragen").disabled = true;
     status("Warte auf noten-fritze.de …");
     clearTimeout(wartezeit);
@@ -148,28 +205,17 @@
       $("uebertragen").disabled = false;
       if (m.ok) {
         try { localStorage.setItem(MERKER, new Date().toISOString()); } catch (_) { /* egal */ }
-        status("Fertig: Die Daten sind auf noten-fritze.de. Bitte ab jetzt nur noch dort arbeiten.", "ok");
+        status("Fertig: Die Daten sind auf noten-fritze.de, eine Backup-Datei liegt zusätzlich " +
+          "in deinen Downloads. Bitte ab jetzt nur noch auf noten-fritze.de arbeiten.", "ok");
       } else {
         status(m.fehler || "Die Übertragung wurde abgebrochen.", "fehler");
       }
     }
   });
 
-  function herunterladen() {
-    aktuellesBackup().then((b) => {
-      if (!b) return;
-      const blob = new Blob([JSON.stringify(b, null, 2)], { type: "application/json" });
-      const a = document.createElement("a");
-      a.href = URL.createObjectURL(blob);
-      a.download = "noten-fritze-backup-" + new Date().toISOString().slice(0, 10) + ".json";
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      setTimeout(() => URL.revokeObjectURL(a.href), 10000);
-    }).catch((err) => status("Das Backup konnte nicht erstellt werden: " + err.message, "fehler"));
-  }
-
   async function start() {
+    const installiert = istInstalliert();
+    $("app-hinweis").hidden = installiert;
     let b = null;
     try {
       b = await aktuellesBackup();
@@ -181,16 +227,31 @@
       $("ohne-daten").hidden = false;
       return;
     }
+    letztes = b;
     $("umfang").textContent = plural(klassen, "Klasse", "Klassen") + " mit " +
       plural(b.data.schueler.length, "Schüler/in", "Schüler/innen");
     $("mit-daten").hidden = false;
+    if (installiert) {
+      $("weg-installiert").hidden = false;
+      // Am Computer (Chrome/Edge) teilen sich App und Browser den Speicher –
+      // dort klappt auch die direkte Übertragung.
+      if (!istIOS()) { $("weg-uebertragen").hidden = false; $("computer-hinweis").hidden = false; }
+    } else {
+      $("weg-uebertragen").hidden = false;
+      $("weg-backup").hidden = false;
+    }
     let schonAm = null;
     try { schonAm = localStorage.getItem(MERKER); } catch (_) { /* egal */ }
     if (schonAm) {
       status("Bereits übertragen am " + new Date(schonAm).toLocaleDateString("de-DE") + ".", "ok");
     }
     $("uebertragen").addEventListener("click", uebertragen);
-    $("herunterladen").addEventListener("click", herunterladen);
+    Array.prototype.forEach.call(document.querySelectorAll(".sichern"), (btn) => btn.addEventListener("click", sichern));
+    document.addEventListener("visibilitychange", () => {
+      if (document.visibilityState === "visible") {
+        aktuellesBackup().then((neu) => { if (neu) letztes = neu; }).catch(() => { /* altes behalten */ });
+      }
+    });
   }
 
   start();
