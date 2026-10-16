@@ -29,7 +29,10 @@ Die Gegenstelle muss im Haupt-Repo eingebaut sein, **bevor** umgestellt wird.
 2. Die App unter der neuen Adresse sieht `?umzug=1` und `window.opener` und schickt
    `{ typ: "noten-fritze-umzug-bereit" }` an `https://noten-fritze.patrick-knapp.de`.
 3. Die Umzugsseite antwortet mit `{ typ: "noten-fritze-umzug-daten", backup }`.
-   `backup` hat das Format von `Store.exportAll` (`appVersion: "umzug"`, ohne Export-Ordner-Handle).
+   `backup` hat das Format von `Store.exportAll({ mitDateien: true })` (`appVersion: "umzug"`):
+   **alle** vorhandenen Stores außer `einstellungen` (davon nur der Datensatz `app`, ohne
+   Export-Ordner-Handle), Datei-Inhalte als `daten64`. Neue Datenarten der App kommen so
+   ohne Änderung an dieser Seite mit, sobald der Import der App sie kennt.
 4. Die App prüft `event.origin`, fragt bei vorhandenen Daten nach (ersetzen / abbrechen),
    ruft `Store.importAll(backup, { replace: true })` auf und meldet
    `{ typ: "noten-fritze-umzug-fertig", ok: true }` bzw. `{ ok: false, fehler: "…" }`.

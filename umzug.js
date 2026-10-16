@@ -16,8 +16,10 @@
 
   const ZIEL = "https://noten-fritze.de";
   const DB_NAME = "noten-fritze";
-  const DATEN_STORES = ["klassen", "schueler", "kategorien", "leistungen", "noten",
-    "sitzplaene", "ereignisse", "abwesenheiten", "stunden"];
+  // Gelesen werden alle vorhandenen Stores außer „einstellungen“ – so kommen
+  // auch Datenarten mit, die die App nach dieser Seite bekommen hat. Was der
+  // Import der App nicht kennt, ignoriert er.
+  const EINSTELLUNGEN = "einstellungen";
   // Merkt sich nur, ob schon übertragen wurde – keine Nutzdaten.
   const MERKER = "noten-fritze-umzug";
 
@@ -43,32 +45,49 @@
     });
   }
 
+  // Datei-Inhalte (ArrayBuffer) als Base64 – Format wie Store.exportAll
+  // mit „mitDateien“, damit der Import der App sie wiederherstellt.
+  function zuBase64(buf) {
+    const b = buf instanceof ArrayBuffer ? new Uint8Array(buf)
+      : new Uint8Array(buf.buffer, buf.byteOffset, buf.byteLength);
+    let s = "";
+    for (let i = 0; i < b.length; i += 0x8000) s += String.fromCharCode.apply(null, b.subarray(i, i + 0x8000));
+    return btoa(s);
+  }
+  function dateiFuerBackup(d) {
+    const x = Object.assign({}, d);
+    const inhalt = d.daten;
+    x.daten64 = inhalt && (inhalt instanceof ArrayBuffer || ArrayBuffer.isView(inhalt)) ? zuBase64(inhalt) : null;
+    delete x.daten;
+    return x;
+  }
+
   function leseBackup(db) {
-    const namen = DATEN_STORES.filter((n) => db.objectStoreNames.contains(n));
-    const mitEinstellungen = db.objectStoreNames.contains("einstellungen");
-    const data = { settings: null };
-    DATEN_STORES.forEach((n) => { data[n] = []; });
-    const alle = mitEinstellungen ? namen.concat("einstellungen") : namen;
+    const namen = Array.prototype.filter.call(db.objectStoreNames, (n) => n !== EINSTELLUNGEN);
+    const mitEinstellungen = db.objectStoreNames.contains(EINSTELLUNGEN);
+    const data = { klassen: [], schueler: [], settings: null };
+    const alle = mitEinstellungen ? namen.concat(EINSTELLUNGEN) : namen;
+    const verpackt = () => ({
+      app: "noten-fritze", appVersion: "umzug",
+      dbVersion: db.version,
+      schemaVersion: (data.settings && data.settings.schemaVersion) || null,
+      exportedAt: new Date().toISOString(),
+      data
+    });
     return new Promise((resolve, reject) => {
-      if (!alle.length) { resolve(data); return; }
+      if (!alle.length) { resolve(verpackt()); return; }
       const tx = db.transaction(alle, "readonly");
       namen.forEach((n) => {
         const r = tx.objectStore(n).getAll();
-        r.onsuccess = () => { data[n] = r.result; };
+        r.onsuccess = () => { data[n] = n === "dateien" ? r.result.map(dateiFuerBackup) : r.result; };
       });
       // Nur der Datensatz „app“; der Export-Ordner (Datei-Handle) gilt nur
       // für diese Adresse und wird auf der neuen Seite neu gewählt.
       if (mitEinstellungen) {
-        const r = tx.objectStore("einstellungen").get("app");
+        const r = tx.objectStore(EINSTELLUNGEN).get("app");
         r.onsuccess = () => { data.settings = r.result || null; };
       }
-      tx.oncomplete = () => resolve({
-        app: "noten-fritze", appVersion: "umzug",
-        dbVersion: db.version,
-        schemaVersion: (data.settings && data.settings.schemaVersion) || null,
-        exportedAt: new Date().toISOString(),
-        data
-      });
+      tx.oncomplete = () => resolve(verpackt());
       tx.onerror = () => reject(tx.error);
       tx.onabort = () => reject(tx.error);
     });
